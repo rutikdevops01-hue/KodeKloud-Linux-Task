@@ -1,0 +1,81 @@
+SOP: Creating Group and Adding User Across All App Servers (Stratos Datacenter)
+
+Purpose:
+To create a centralized group 'nautilus_noc' and ensure user 'stark' exists and is a member of this group on all App Servers in the Stratos Datacenter.
+
+Scope:
+Applicable to:
+- App Server 1 (stapp01)
+- App Server 2 (stapp02)
+- App Server 3 (stapp03)
+
+Prerequisites:
+- SSH access to the jump host and App Servers.
+- sudo privileges on each App Server.
+- Network connectivity between jump host and App Servers.
+
+Procedure:
+
+Step 1 — Connect to the Jump Host
+ssh thor@jumphost
+
+Step 2 — Connect to Each App Server
+ssh banner@172.16.238.12
+
+If prompted:
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+Type: yes
+
+Step 3 — Switch to Root User
+sudo su -
+
+Step 4 — Create Group 'nautilus_noc'
+groupadd nautilus_noc
+
+Verification:
+getent group nautilus_noc
+Expected output: nautilus_noc:x:<gid>:
+
+Step 5 — Check if User 'stark' Exists
+id stark
+
+If not found, create it:
+useradd -m stark
+
+Verification:
+id stark
+Expected: uid=<uid>(stark) gid=<gid>(stark) groups=<gid>(stark)
+
+Step 6 — Add User 'stark' to Group
+usermod -aG nautilus_noc stark
+
+Verification:
+id stark
+Expected: groups=<gid>(stark),<gid>(nautilus_noc)
+
+getent group nautilus_noc
+Expected: nautilus_noc:x:<gid>:stark
+
+Step 7 — Repeat on All App Servers
+Perform steps on stapp01, stapp02, stapp03
+
+Verification Summary:
+Command: getent group nautilus_noc
+Expected Output: nautilus_noc:x:<gid>:stark
+
+Command: id stark
+Expected Output: uid=<uid>(stark) gid=<gid>(stark) groups=<gid>(stark),<gid>(nautilus_noc)
+
+Troubleshooting:
+- 'Permission denied': Use sudo or switch to root.
+- 'cannot lock /etc/passwd': Wait a few seconds and retry.
+- 'group already exists': Verify group membership.
+
+Example Output (Verified on stapp03):
+[root@stapp03 ~]# useradd stark
+[root@stapp03 ~]# groupadd nautilus_noc
+[root@stapp03 ~]# usermod -aG nautilus_noc stark
+[root@stapp03 ~]# id stark
+uid=1002(stark) gid=1002(stark) groups=1002(stark),1003(nautilus_noc)
+[root@stapp03 ~]# getent group nautilus_noc
+nautilus_noc:x:1003:stark

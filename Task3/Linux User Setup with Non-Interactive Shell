@@ -1,0 +1,43 @@
+SOP: Create a Non-Interactive User on App Server
+
+Objective:
+Create a user 'john' on App Server 3 and configure it with a non-interactive shell to prevent direct login.
+
+Steps:
+
+1. SSH into the App Server
+ssh banner@172.16.238.12
+- Enter the password when prompted.
+- Approve the SSH fingerprint if connecting for the first time.
+
+2. Switch to Root User
+sudo su -
+- Enter the password for 'banner' when prompted.
+
+3. Create the User
+useradd john
+- Creates user 'john' with default home directory /home/john and shell /bin/bash.
+
+4. Verify User Creation
+cat /etc/passwd | grep john
+Expected Output:
+john:x:1002:1002::/home/john:/bin/bash
+
+5. Set Non-Interactive Shell
+usermod -s $(command -v nologin || echo /bin/false) john
+
+6. Verify Shell Change
+cat /etc/passwd | grep john
+Expected Output:
+john:x:1002:1002::/home/john:/usr/sbin/nologin
+- Confirms user 'john' cannot log in interactively.
+
+Verification Command:
+su - john
+Expected Output:
+This account is currently not available.
+
+Notes:
+- /usr/sbin/nologin → Displays a polite message and prevents login.
+- /bin/false → Denies login silently.
+- Use this configuration for service/application accounts to improve security.

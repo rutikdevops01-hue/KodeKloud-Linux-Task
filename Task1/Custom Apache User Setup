@@ -1,0 +1,42 @@
+SOP: Create User (james) on App Server 3
+
+Section                     Details
+----------------------------------------------------------------------------------------
+Objective                   Create user 'james' with specific UID and home directory.
+
+Pre-Requisites              SSH access to App Server 3, sudo/root privileges.
+
+Step 1                      SSH to App Server 3:
+                            ssh banner@172.16.238.12
+
+Step 2                      Switch to root:
+                            sudo su -
+
+Step 3                      Create the home directory (if not already present):
+                            mkdir -p /var/www/james
+
+Step 4                      Create user 'james' with UID 1782 and set home directory:
+                            useradd -u 1782 -d /var/www/james -m james
+
+Note                        The '-m' option ensures the home directory exists.
+                            If it already exists, a warning appears (safe to ignore).
+
+Step 5                      Verify the user details:
+                            id james
+                            getent passwd james
+
+Expected Output             uid=1782(james) gid=1782(james) groups=1782(james)
+                            james:x:1782:1782::/var/www/james:/bin/bash
+
+Step 6 (Optional)           Set a non-interactive shell if required:
+                            usermod -s /usr/sbin/nologin james
+
+Step 7                      Confirm shell and user entry:
+                            grep james /etc/passwd
+
+Rollback                    Delete user and remove home directory:
+                            userdel -r james
+
+End State                   User 'james' exists with UID 1782 and home directory /var/www/james
+                            Default shell: /bin/bash (unless changed).
+----------------------------------------------------------------------------------------

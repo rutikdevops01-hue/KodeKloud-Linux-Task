@@ -1,0 +1,69 @@
+SOP: Create a User Without a Home Directory (App Server 1)
+
+Objective:
+To create a user named "kirsty" on App Server 1 without generating a home directory, ensuring minimal resource usage and standard Linux user management practices.
+
+Prerequisites:
+- SSH access to App Server 1 (IP: 172.16.238.10)
+- Login as tony (sudo-privileged user)
+- Sudo privileges to execute administrative commands
+- Server reachable via SSH from jump host
+
+Steps:
+
+1. SSH into App Server 1:
+   Command: ssh tony@172.16.238.10
+   Explanation: Connects securely to App Server 1 using the tony user.
+
+2. Switch to root user:
+   Command: sudo su -
+   Explanation: Grants root privileges for user creation.
+
+3. Verify root access:
+   Command: whoami
+   Expected Output: root
+   Explanation: Confirms that the session is running with root privileges.
+
+4. Create the user without a home directory:
+   Command: useradd -M kirsty
+   Explanation:
+     - useradd: command to create a new user
+     - -M: prevents automatic creation of a home directory
+     - kirsty: username of the new account
+
+5. Verify user creation:
+   Command: id kirsty
+   Expected Output:
+     uid=1002(kirsty) gid=1002(kirsty) groups=1002(kirsty)
+   Explanation: Confirms user existence and assigned UID/GID.
+
+6. Check /etc/passwd entry:
+   Command: cat /etc/passwd | grep kirsty
+   Expected Output:
+     kirsty:x:1002:1002::/home/kirsty:/bin/bash
+   Explanation: Confirms user entry. Home directory path shown is default but not created.
+
+7. Verify absence of home directory:
+   Command: ls -ld /home/kirsty
+   Expected Output:
+     ls: cannot access '/home/kirsty': No such file or directory
+   Explanation: Confirms that no home directory exists.
+
+Best Practice:
+To explicitly indicate no home directory in /etc/passwd, use:
+   useradd -M -d /nonexistent kirsty
+This sets home directory to /nonexistent for clarity in audits.
+
+Command Reference Table:
+Command                         Purpose
+ssh user@ip                     Connect to remote server
+sudo su -                        Switch to root user
+useradd -M username             Add user without home directory
+id username                      Display user identity info
+cat /etc/passwd | grep username  View user account entry
+ls -ld /home/username            Check home directory existence
+
+Result:
+- User "kirsty" successfully created.
+- No home directory created.
+- /etc/passwd entry recorded with default home path only.
